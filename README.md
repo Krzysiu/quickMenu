@@ -1,12 +1,15 @@
 # 🚀 QuickMenu (qmenu)
 
-A lightweight CLI selector built for Windows batch scripts and automation workflows. It provides a visual menu for command-line interfaces, allowing users to make selections using arrow keys without complex scripting.
+A lightweight CLI selector built for Windows batch scripts and automation workflows. It provides a visual menu for command-line interfaces, allowing users to make selections using arrow keys without complex scripting. The choice is made either by **arrow keys**, or pressing **corresponding number on keyboard**. Of course it behaves nicely with _arrow up on first element_ and it jumps to the last element.
 
 ![readme-example](https://github.com/user-attachments/assets/33dc227c-3e99-4384-8305-845f88669166)
 
 
 ## ✨ Features
 * **Zero Dependencies**: Standalone EXE, no Python environment needed on the target machine.
+* **Smart Navigation**: 
+    * Use **arrow keys** or press the **corresponding number** on your keyboard for instant selection.
+    * Supports wrap-around (pressing **Up** on the first element jumps to the last).
 * **Dual-Output**: Get results via system exit code or by reading a generated file.
 * **Modern Terminal Support**: Full UTF-8/Unicode support for icons and special characters.
 
