@@ -11,10 +11,24 @@ import sys
 import os
 import argparse
 import tempfile
+import curses
 from cursesmenu import CursesMenu
 from cursesmenu.items import FunctionItem
 
 __version__ = "0.0.1"
+
+class HotkeyMenu(CursesMenu):
+    def process_user_input(self, *args, **kwargs):
+        key = args[0] if args else self.stdscr.getch()
+        
+        if 49 <= key <= 57:
+            sel = key - 49
+            if sel < len(self.items):
+                self.selected_option = sel
+                self.items[self.selected_option].action()
+                return 
+        curses.ungetch(key)
+        super().process_user_input()
 
 def print_help():
     print(f"QuickMenu v{__version__} (bin: qmenu.exe)")
@@ -25,8 +39,6 @@ def print_help():
     print("\t-t, --title\tcustom menu title")
     print("\t-f, --file\tsave to [file] (default: %TEMP%\\lastItem.mnu)")
     print("\t-ne, --no-exit\talways return exit code 0 on success\n")
-    print("Example:")
-    print("qmenu -c \"Apple,Orange,Banana\" -f selection.txt")
 
 def main():
     if len(sys.argv) == 1 or "-h" in sys.argv or "--help" in sys.argv:
@@ -53,14 +65,11 @@ def main():
         state["text"] = options[idx]
         menu.exit()
 
-    menu = CursesMenu(args.title, args.desc, show_exit_item=False)
+    menu = HotkeyMenu(title=args.title, subtitle=args.desc, show_exit_item=False)
     for i, opt in enumerate(options):
         menu.items.append(FunctionItem(opt, on_select, args=[i]))
 
-    try:
-        menu.show()
-    except Exception:
-        sys.exit(255)
+    menu.show()
 
     if state["idx"] is not None:
         if args.file:
