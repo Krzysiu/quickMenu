@@ -1,6 +1,6 @@
 # 🚀 QuickMenu (qmenu)
 
-A lightweight CLI selector built for Windows batch scripts and automation workflows. It provides a visual menu for command-line interfaces, allowing users to make selections using arrow keys without complex scripting. The choice is made either by **arrow keys**, or pressing **corresponding number on keyboard**. Of course it behaves nicely with _arrow up on first element_ and it jumps to the last element.
+A lightweight CLI selector built for Windows batch scripts and automation workflows. It provides a visual menu for command-line interfaces, allowing users to make selections using arrow keys without complex scripting. Select an item with **arrow keys and Enter**, or press its **corresponding number (1–9)** for instant selection. Of course it behaves nicely with _arrow up on first element_ and it jumps to the last element.
 
 ![readme-example](https://github.com/user-attachments/assets/33dc227c-3e99-4384-8305-845f88669166)
 
@@ -8,7 +8,7 @@ A lightweight CLI selector built for Windows batch scripts and automation workfl
 ## ✨ Features
 * **Zero Dependencies**: Standalone EXE, no Python environment needed on the target machine.
 * **Smart Navigation**: 
-    * Use **arrow keys** or press the **corresponding number** on your keyboard for instant selection.
+    * Use **arrow keys and Enter**, or press the **corresponding number (1–9)** on your keyboard for instant selection.
     * Supports wrap-around (pressing **Up** on the first element jumps to the last).
 * **Dual-Output**: Get results via system exit code or by reading a generated file.
 * **Modern Terminal Support**: Full UTF-8/Unicode support for icons and special characters.
@@ -16,7 +16,7 @@ A lightweight CLI selector built for Windows batch scripts and automation workfl
 ---
 ## 💾 Download
 
-You can find the latest standalone binary in the **[Releases](https://github.com/quickMenu/releases)** section:
+You can find the latest standalone binary in the **[Releases](https://github.com/Krzysiu/quickMenu/releases)** section:
 
 * **`qmenu-0-0-1-win64.7z`**: Pre-compiled executable for Windows (64-bit). Just extract and run.
 ## 🛠 Usage
@@ -33,8 +33,22 @@ qmenu -c "Option 1,Option 2,Option 3" [options]
 | `-t` | `--title` | Custom menu title. |
 | `-d` | `--desc` | Custom subtitle/description. |
 | `-f` | `--file` | Save selected text to file. Defaults to `%TEMP%\lastItem.mnu`. |
-| `-ne`| `--no-exit` | **Success Mode.** Returns exit code `0` on selection and `1` on Cancel/Esc. Perfect for `&&` chaining. |
+| `-ne`| `--no-exit` | Returns exit code `0` on successful selection. Argument and file-write errors return `255`. |
 | `-h` | `--help` | Show help and version information. |
+
+Without `-ne`, the exit code is the selected item number, starting at `1`. Escape is not a cancel shortcut. `-f` without a path writes to `%TEMP%\\lastItem.mnu`; an explicit path writes there instead. No arguments show help.
+
+### Run from Python source
+
+```batch
+python -m venv .venv
+.venv\\Scripts\\python.exe -m pip install -r requirements-win.txt
+.venv\\Scripts\\python.exe qmenu.py -c "trzmiel kamiennik,trzmiel ziemny"
+```
+
+### Version 0.0.4
+
+Fixed Enter selection leaving the menu open and the earlier menu-thread shutdown error. Enter and number shortcuts now use the same selection path. File-write errors are reported instead of silently ignored.
 
 ---
 
@@ -48,7 +62,7 @@ QuickMenu maps the selection to `ERRORLEVEL`. Using `-ne` allows you to chain co
 qmenu -t "Weather Selection" -d "Choose your weather modifier" -c "Increase temperature,Decrease temperature,Quick flood mode" -ne && (
     echo "Modification applied successfully!"
 ) || (
-    echo "Action cancelled by user."
+    echo "Selection failed."
 )
 ```
 
