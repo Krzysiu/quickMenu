@@ -15,20 +15,22 @@ import curses
 from cursesmenu import CursesMenu
 from cursesmenu.items import FunctionItem
 
-__version__ = "0.0.1"
+__version__ = "0.0.4"
 
 class HotkeyMenu(CursesMenu):
-    def process_user_input(self, *args, **kwargs):
-        key = args[0] if args else self.stdscr.getch()
-        
-        if 49 <= key <= 57:
-            sel = key - 49
-            if sel < len(self.items):
-                self.selected_option = sel
-                self.items[self.selected_option].action()
-                return 
-        curses.ungetch(key)
-        super().process_user_input()
+    def process_user_input(self):
+        key = self.get_input()
+        if ord("1") <= key <= ord("9"):
+            index = key - ord("1")
+            if index < len(self.items):
+                self.current_option = index
+                self.select()
+        elif key in (10, 13, curses.KEY_ENTER):
+            self.select()
+        else:
+            self.user_input_handlers[key](key)
+        return key
+
 
 def print_help():
     print(f"QuickMenu v{__version__} (bin: qmenu.exe)")
@@ -60,16 +62,20 @@ def main():
     options = [opt.strip() for opt in args.choices.split(",")]
     state = {"idx": None, "text": None}
 
+    # Inicjalizacja menu
+    menu = HotkeyMenu(title=args.title, subtitle=args.desc, show_exit_item=False)
+
     def on_select(idx):
         state["idx"] = idx
         state["text"] = options[idx]
-        menu.exit()
 
-    menu = HotkeyMenu(title=args.title, subtitle=args.desc, show_exit_item=False)
     for i, opt in enumerate(options):
-        menu.items.append(FunctionItem(opt, on_select, args=[i]))
+        menu.items.append(FunctionItem(opt, on_select, args=[i], should_exit=True))
 
-    menu.show()
+    # Uruchamiamy menu. show() to tylko wrapper na start() i join()
+    # Wywołujemy to w sposób, który nie wywala błędu o argumentach
+    menu.start()
+    menu.join()
 
     if state["idx"] is not None:
         if args.file:
@@ -79,11 +85,12 @@ def main():
             try:
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(state["text"])
-            except:
-                pass
+            except OSError as exc:
+                print(f"qmenu: cannot write {path}: {exc}", file=sys.stderr)
+                sys.exit(255)
         sys.exit(0 if args.no_exit else state["idx"] + 1)
     else:
         sys.exit(255)
 
 if __name__ == "__main__":
-    main() 
+    main()
